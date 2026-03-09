@@ -6,10 +6,9 @@ export default async function handler(req, res) {
   const { html, revisionMode, pagePurpose, contentType } = req.body;
 
   return res.status(200).json({
-    message: "Proxy is working",
-    html: html,
-    revisionMode: revisionMode,
-    pagePurpose: pagePurpose,
-    contentType: contentType
+    html_output: html,
+    revision_mode: revisionMode,
+    page_purpose: pagePurpose,
+    content_type: contentType
   });
 }
