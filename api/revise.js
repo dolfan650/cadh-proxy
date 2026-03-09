@@ -33,20 +33,19 @@ Return ONLY revised HTML.
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
-      body: JSON.stringify({
-        model: "gpt-5-mini",
-        messages: [
-          {
-            role: "system",
-            content: "You revise Canvas HTML for accessibility and instructional clarity."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.2
-      })
+body: JSON.stringify({
+  model: "gpt-5-mini",
+  messages: [
+    {
+      role: "system",
+      content: "You revise Canvas HTML for accessibility and instructional clarity."
+    },
+    {
+      role: "user",
+      content: prompt
+    }
+  ]
+})
     });
 
     const data = await response.json();
