@@ -7,11 +7,9 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     message: "Proxy is working",
-    received: {
-      html,
-      revisionMode,
-      pagePurpose,
-      contentType
-    }
+    html: html,
+    revisionMode: revisionMode,
+    pagePurpose: pagePurpose,
+    contentType: contentType
   });
 }
