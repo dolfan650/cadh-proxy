@@ -160,6 +160,7 @@ function cleanHtml(html) {
   cleaned = cleaned.replace(/<\/?body[^>]*>/gi, "");
   cleaned = cleaned.replace(/<\/?main[^>]*>/gi, "");
   cleaned = cleaned.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "");
-cleaned = cleaned.replace(/,\s*$/, "");
+  cleaned = cleaned.replace(/,\s*$/, "");
+  cleaned = cleaned.replace(/<\/p>,/gi, "</p>");
   return cleaned.trim();
 }
