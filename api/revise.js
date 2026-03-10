@@ -149,7 +149,6 @@ REVIEW_ITEMS:
     });
   }
 }
-
 function cleanHtml(html) {
   let cleaned = (html || "").trim();
 
@@ -160,7 +159,13 @@ function cleanHtml(html) {
   cleaned = cleaned.replace(/<\/?body[^>]*>/gi, "");
   cleaned = cleaned.replace(/<\/?main[^>]*>/gi, "");
   cleaned = cleaned.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "");
-  cleaned = cleaned.replace(/,\s*$/, "");
-  cleaned = cleaned.replace(/<\/p>,/gi, "</p>");
+
+  // Remove commas immediately after a closing HTML tag, like </p>, or </ol>,
+  cleaned = cleaned.replace(/(>),(\s*)$/g, "$1");
+  cleaned = cleaned.replace(/(<\/[a-z0-9]+>),/gi, "$1");
+
+  // Remove a trailing comma at the very end, with or without whitespace
+  cleaned = cleaned.replace(/,\s*$/g, "");
+
   return cleaned.trim();
 }
