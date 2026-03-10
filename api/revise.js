@@ -10,9 +10,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { html, revisionMode, pagePurpose, contentType } = req.body || {};
+    const { html, html_b64, revisionMode, pagePurpose, contentType } = req.body || {};
 
-    const inputHtml = typeof html === "string" ? html.trim() : "";
+    let inputHtml = "";
+
+    if (typeof html_b64 === "string" && html_b64.trim()) {
+      inputHtml = Buffer.from(html_b64, "base64").toString("utf-8").trim();
+    } else if (typeof html === "string") {
+      inputHtml = html.trim();
+    }
+
     const mode = typeof revisionMode === "string" ? revisionMode.trim() : "Accessibility Cleanup";
     const purpose = typeof pagePurpose === "string" ? pagePurpose.trim() : "";
     const type = typeof contentType === "string" ? contentType.trim() : "Canvas page";
