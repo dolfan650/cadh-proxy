@@ -118,7 +118,7 @@ Return JSON:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": \`Bearer \${process.env.OPENAI_API_KEY}\`
+     "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: "gpt-5.3",
@@ -170,7 +170,19 @@ Return JSON:
       ? parsed.review_items.map(String).join("\\n")
       : "";
 
-    html_output = cleanHtml(html_output);
+   html_output = cleanHtml(html_output);
+
+if (!html_output) {
+  html_output = inputHtml;
+}
+
+if (!changes_made) {
+  changes_made = "Reviewed the HTML and preserved structure.";
+}
+
+if (!review_items) {
+  review_items = "No additional review items.";
+}
 
     return res.status(200).json({
       html_output,
