@@ -54,70 +54,57 @@ Rules:
 - Return ONLY valid JSON.
 - Do not include markdown fences.
 - Do not include explanatory text before or after the JSON.
-- The "html_output" value must be an HTML fragment only, not a full HTML document.
+- The "html_output" value must be an HTML fragment only.
 - Do not return <!DOCTYPE html>, <html>, <head>, <body>, <main>, or <title>.
 - Preserve valid existing HTML whenever possible.
 - Make the lightest effective revision UNLESS accessibility issues require stronger changes.
 - For Canvas content, start headings at <h2>, not <h1>.
 - Convert fake lists into real semantic lists when needed.
 - Do not add unnecessary ARIA, wrappers, ids, sections, or landmarks.
-- Do not convert <strong> to <kbd>.
 - Preserve iframe embeds unless clearly invalid or unsafe.
-- Correct obvious grammar, punctuation, spelling, and mechanics issues only when meaning is clear.
 - Preserve instructor meaning, sequence, emphasis, and embedded content.
-- "changes_made" must be an array of short strings.
-- "review_items" must be an array of short strings.
-- If there are no review items, return an empty array.
 
-MANDATORY ACCESSIBILITY FIXES (MUST BE APPLIED IN OUTPUT HTML)
+MANDATORY ACCESSIBILITY FIXES (MUST BE APPLIED)
 
 - Do not rely on color alone to convey meaning.
-  Replace color-based meaning (e.g., red = required, green = optional) with explicit text.
-
 - Fix low contrast text.
-  Remove or adjust inline styles that create poor contrast (e.g., light gray text on white).
+- Normalize font sizes (remove sizes below 14px).
+- Replace vague links like "click here".
+- Add alt text to images.
+- Convert manual lists into semantic lists.
 
-- Normalize font sizes.
-  Remove inline font sizes below 14px and ensure consistent, readable body text.
+TABLE RULES (STRICT)
 
-- Repair all tables used for data.
-  Add a <caption> describing the table purpose.
-  Convert header rows to <th scope="col">.
-  Ensure tables are structurally accessible.
+- All data tables MUST include:
+  - <caption>
+  - <thead> and <tbody>
+  - <th scope="col">
 
-- Replace vague links like "click here" with descriptive link text.
+- DO NOT remove existing table structure.
 
-- Add alt text to all images that do not already have meaningful alt attributes.
+- Preserve or improve table styling for readability:
+  - Keep or add borders
+  - Maintain cell padding
+  - Maintain header distinction (background or emphasis)
 
-- Convert manually formatted lists into proper <ul> or <ol> elements.
+- DO NOT flatten or strip tables into plain text.
 
-- Remove or rewrite inline styles that reduce accessibility, including small font sizes and low-contrast colors.
+CAPTION RULES
 
-These issues MUST be corrected in the revised HTML, not just described.
+- Captions must be short, clear, and readable on one line.
+- Do not introduce awkward line breaks.
+- Example: "Week 4 schedule and point values"
 
-PRE-OUTPUT ACCESSIBILITY CHECK (REQUIRED)
+PRE-OUTPUT CHECK (REQUIRED)
 
-Before producing the final HTML, verify:
-
-- Is meaning conveyed only by color anywhere?
-- Is any text low contrast?
-- Are any font sizes unusually small?
-- Do all tables have captions and proper headers?
-- Are there vague links?
-- Are there images without alt text?
-
-If ANY issue is found, it must be fixed before output.
-
-FINAL SELF-CHECK (REQUIRED)
-
-After generating the revised HTML, review it again and confirm:
+Before returning HTML, confirm:
 
 - No color-only meaning remains
-- No font sizes below readable threshold remain
-- All tables include captions and headers
-- No low-contrast text remains
+- No tiny font remains
+- Tables include caption + headers
+- Table formatting is preserved or improved (not removed)
 
-If any issue remains, revise the HTML before returning output.
+If any issue exists, fix it before returning output.
 
 Revision Mode: ${mode}
 Page Purpose: ${purpose}
@@ -130,12 +117,10 @@ Return exactly this JSON shape:
 {
   "html_output": "<h2>Example</h2><p>Example</p>",
   "changes_made": [
-    "Change one",
-    "Change two"
+    "Change one"
   ],
   "review_items": [
-    "Review one",
-    "Review two"
+    "Review one"
   ]
 }
 `;
@@ -144,7 +129,7 @@ Return exactly this JSON shape:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        "Authorization": \`Bearer \${process.env.OPENAI_API_KEY}\`
       },
       body: JSON.stringify({
         model: "gpt-5-mini",
@@ -152,13 +137,13 @@ Return exactly this JSON shape:
           {
             role: "system",
             content:
-              "You are a careful accessibility and instructional design assistant for Canvas HTML. You MUST enforce accessibility rules strictly and return only valid JSON that matches the requested schema."
+              "You are a strict accessibility and Canvas design assistant. You must enforce all accessibility and table formatting rules before returning JSON."
           },
           {
             role: "user",
             content: prompt
           }
-        ],
+        ]
       })
     });
 
@@ -189,33 +174,14 @@ Return exactly this JSON shape:
       typeof parsed.html_output === "string" ? parsed.html_output.trim() : "";
 
     let changes_made = Array.isArray(parsed.changes_made)
-      ? parsed.changes_made
-          .map((item) => String(item).trim())
-          .filter(Boolean)
-          .join("\n")
+      ? parsed.changes_made.map(String).join("\\n")
       : "";
 
     let review_items = Array.isArray(parsed.review_items)
-      ? parsed.review_items
-          .map((item) => String(item).trim())
-          .filter(Boolean)
-          .join("\n")
+      ? parsed.review_items.map(String).join("\\n")
       : "";
 
     html_output = cleanHtml(html_output);
-
-    if (!html_output) {
-      html_output = inputHtml;
-    }
-
-    if (!changes_made) {
-      changes_made =
-        "Reviewed the HTML and preserved the original structure where possible.";
-    }
-
-    if (!review_items) {
-      review_items = "No additional human review items were identified.";
-    }
 
     return res.status(200).json({
       html_output,
@@ -230,53 +196,4 @@ Return exactly this JSON shape:
       details: error.message
     });
   }
-}
-
-function extractJsonObject(raw) {
-  if (!raw || typeof raw !== "string") {
-    throw new Error("Empty model response");
-  }
-
-  const trimmed = raw.trim();
-
-  try {
-    return JSON.parse(trimmed);
-  } catch (_) {
-    const firstBrace = trimmed.indexOf("{");
-    const lastBrace = trimmed.lastIndexOf("}");
-
-    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
-      throw new Error("No JSON object found in model response");
-    }
-
-    const candidate = trimmed.substring(firstBrace, lastBrace + 1);
-    return JSON.parse(candidate);
-  }
-}
-
-function cleanHtml(html) {
-  let cleaned = (html || "").trim();
-
-  cleaned = cleaned.replace(/^```html/i, "").replace(/^```/, "").replace(/```$/, "").trim();
-  cleaned = cleaned.replace(/<!DOCTYPE html>/gi, "");
-  cleaned = cleaned.replace(/<\/?html[^>]*>/gi, "");
-  cleaned = cleaned.replace(/<\/?head[^>]*>/gi, "");
-  cleaned = cleaned.replace(/<\/?body[^>]*>/gi, "");
-  cleaned = cleaned.replace(/<\/?main[^>]*>/gi, "");
-  cleaned = cleaned.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "");
-
-  cleaned = cleaned.replace(/(>),(\s*)$/g, "$1");
-  cleaned = cleaned.replace(/(<\/[a-z0-9]+>),/gi, "$1");
-  cleaned = cleaned.replace(/,\s*$/g, "");
-
-  return cleaned.trim();
-}
-
-function toBullets(text) {
-  return String(text)
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => (line.startsWith("- ") ? line : `- ${line}`))
-    .join("\n");
 }
