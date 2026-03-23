@@ -163,11 +163,11 @@ Return JSON:
       typeof parsed.html_output === "string" ? parsed.html_output.trim() : "";
 
     let changes_made = Array.isArray(parsed.changes_made)
-      ? parsed.changes_made.map(String).join("\\n")
+      ? parsed.changes_made.map(String).join("\n")
       : "";
 
     let review_items = Array.isArray(parsed.review_items)
-      ? parsed.review_items.map(String).join("\\n")
+      ? parsed.review_items.map(String).join("\n")
       : "";
 
    html_output = cleanHtml(html_output);
