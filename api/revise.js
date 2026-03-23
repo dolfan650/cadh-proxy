@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     }
 
     const prompt = `
-You are CADH, a Canvas Accessibility and Design Helper.
+You are CHAD, a Canvas Accessibility and Design Helper.
 
 Revise the following Canvas HTML fragment for accessibility and instructional clarity.
 
@@ -57,18 +57,67 @@ Rules:
 - The "html_output" value must be an HTML fragment only, not a full HTML document.
 - Do not return <!DOCTYPE html>, <html>, <head>, <body>, <main>, or <title>.
 - Preserve valid existing HTML whenever possible.
-- Make the lightest effective revision.
+- Make the lightest effective revision UNLESS accessibility issues require stronger changes.
 - For Canvas content, start headings at <h2>, not <h1>.
 - Convert fake lists into real semantic lists when needed.
 - Do not add unnecessary ARIA, wrappers, ids, sections, or landmarks.
 - Do not convert <strong> to <kbd>.
-- Preserve tables unless clearly invalid or inaccessible.
 - Preserve iframe embeds unless clearly invalid or unsafe.
 - Correct obvious grammar, punctuation, spelling, and mechanics issues only when meaning is clear.
 - Preserve instructor meaning, sequence, emphasis, and embedded content.
 - "changes_made" must be an array of short strings.
 - "review_items" must be an array of short strings.
 - If there are no review items, return an empty array.
+
+MANDATORY ACCESSIBILITY FIXES (MUST BE APPLIED IN OUTPUT HTML)
+
+- Do not rely on color alone to convey meaning.
+  Replace color-based meaning (e.g., red = required, green = optional) with explicit text.
+
+- Fix low contrast text.
+  Remove or adjust inline styles that create poor contrast (e.g., light gray text on white).
+
+- Normalize font sizes.
+  Remove inline font sizes below 14px and ensure consistent, readable body text.
+
+- Repair all tables used for data.
+  Add a <caption> describing the table purpose.
+  Convert header rows to <th scope="col">.
+  Ensure tables are structurally accessible.
+
+- Replace vague links like "click here" with descriptive link text.
+
+- Add alt text to all images that do not already have meaningful alt attributes.
+
+- Convert manually formatted lists into proper <ul> or <ol> elements.
+
+- Remove or rewrite inline styles that reduce accessibility, including small font sizes and low-contrast colors.
+
+These issues MUST be corrected in the revised HTML, not just described.
+
+PRE-OUTPUT ACCESSIBILITY CHECK (REQUIRED)
+
+Before producing the final HTML, verify:
+
+- Is meaning conveyed only by color anywhere?
+- Is any text low contrast?
+- Are any font sizes unusually small?
+- Do all tables have captions and proper headers?
+- Are there vague links?
+- Are there images without alt text?
+
+If ANY issue is found, it must be fixed before output.
+
+FINAL SELF-CHECK (REQUIRED)
+
+After generating the revised HTML, review it again and confirm:
+
+- No color-only meaning remains
+- No font sizes below readable threshold remain
+- All tables include captions and headers
+- No low-contrast text remains
+
+If any issue remains, revise the HTML before returning output.
 
 Revision Mode: ${mode}
 Page Purpose: ${purpose}
@@ -103,7 +152,7 @@ Return exactly this JSON shape:
           {
             role: "system",
             content:
-              "You are a careful accessibility and instructional design assistant for Canvas HTML. Return only valid JSON that matches the requested schema."
+              "You are a careful accessibility and instructional design assistant for Canvas HTML. You MUST enforce accessibility rules strictly and return only valid JSON that matches the requested schema."
           },
           {
             role: "user",
