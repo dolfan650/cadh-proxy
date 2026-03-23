@@ -45,59 +45,30 @@ export default async function handler(req, res) {
       });
     }
 
-  const prompt = `
-You are CHAD, a Canvas Accessibility and Design Helper.
+    const prompt = `
+You are CADH, a Canvas Accessibility and Design Helper.
 
 Revise the following Canvas HTML fragment for accessibility and instructional clarity.
 
 Rules:
 - Return ONLY valid JSON.
-- No markdown.
-- No extra text.
-- Output must be an HTML fragment only.
-- No <html>, <body>, or full document tags.
-- Preserve valid HTML when possible.
-- Make minimal changes unless accessibility requires more.
-- Start headings at <h2>.
-- Convert fake lists to real lists.
-- Preserve meaning and structure.
-
-MANDATORY ACCESSIBILITY FIXES
-
-- Do not rely on color alone to convey meaning.
-- Fix low contrast text.
-- Remove font sizes below 14px.
-- Replace vague links like "click here".
-- Add alt text to images.
-- Convert manual lists to semantic lists.
-
-TABLE RULES (STRICT)
-
-- Tables MUST include:
-  - caption
-  - thead
-  - tbody
-  - th with scope="col"
-
-- DO NOT remove tables.
-- DO NOT flatten tables.
-
-- Preserve or improve readability:
-  - borders
-  - padding
-  - header distinction
-
-CAPTION RULES
-
-- Keep captions short and readable on one line.
-- Example: Week 4 schedule and point values
-
-PRE-CHECK
-
-Before returning:
-- No color-only meaning
-- No tiny fonts
-- Tables are complete and readable
+- Do not include markdown fences.
+- Do not include explanatory text before or after the JSON.
+- The "html_output" value must be an HTML fragment only, not a full HTML document.
+- Do not return <!DOCTYPE html>, <html>, <head>, <body>, <main>, or <title>.
+- Preserve valid existing HTML whenever possible.
+- Make the lightest effective revision.
+- For Canvas content, start headings at <h2>, not <h1>.
+- Convert fake lists into real semantic lists when needed.
+- Do not add unnecessary ARIA, wrappers, ids, sections, or landmarks.
+- Do not convert <strong> to <kbd>.
+- Preserve tables unless clearly invalid or inaccessible.
+- Preserve iframe embeds unless clearly invalid or unsafe.
+- Correct obvious grammar, punctuation, spelling, and mechanics issues only when meaning is clear.
+- Preserve instructor meaning, sequence, emphasis, and embedded content.
+- "changes_made" must be an array of short strings.
+- "review_items" must be an array of short strings.
+- If there are no review items, return an empty array.
 
 Revision Mode: ${mode}
 Page Purpose: ${purpose}
@@ -106,11 +77,17 @@ Content Type: ${type}
 Canvas HTML:
 ${inputHtml}
 
-Return JSON:
+Return exactly this JSON shape:
 {
   "html_output": "<h2>Example</h2><p>Example</p>",
-  "changes_made": ["Change one"],
-  "review_items": ["Review one"]
+  "changes_made": [
+    "Change one",
+    "Change two"
+  ],
+  "review_items": [
+    "Review one",
+    "Review two"
+  ]
 }
 `;
 
@@ -118,7 +95,7 @@ Return JSON:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-     "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: "gpt-5-mini",
@@ -126,13 +103,13 @@ Return JSON:
           {
             role: "system",
             content:
-              "You are a strict accessibility and Canvas design assistant. You must enforce all accessibility and table formatting rules before returning JSON."
+              "You are a careful accessibility and instructional design assistant for Canvas HTML. Return only valid JSON that matches the requested schema."
           },
           {
             role: "user",
             content: prompt
           }
-        ]
+        ],
       })
     });
 
@@ -163,26 +140,33 @@ Return JSON:
       typeof parsed.html_output === "string" ? parsed.html_output.trim() : "";
 
     let changes_made = Array.isArray(parsed.changes_made)
-      ? parsed.changes_made.map(String).join("\n")
+      ? parsed.changes_made
+          .map((item) => String(item).trim())
+          .filter(Boolean)
+          .join("\n")
       : "";
 
     let review_items = Array.isArray(parsed.review_items)
-      ? parsed.review_items.map(String).join("\n")
+      ? parsed.review_items
+          .map((item) => String(item).trim())
+          .filter(Boolean)
+          .join("\n")
       : "";
 
-   html_output = cleanHtml(html_output);
+    html_output = cleanHtml(html_output);
 
-if (!html_output) {
-  html_output = inputHtml;
-}
+    if (!html_output) {
+      html_output = inputHtml;
+    }
 
-if (!changes_made) {
-  changes_made = "Reviewed the HTML and preserved structure.";
-}
+    if (!changes_made) {
+      changes_made =
+        "Reviewed the HTML and preserved the original structure where possible.";
+    }
 
-if (!review_items) {
-  review_items = "No additional review items.";
-}
+    if (!review_items) {
+      review_items = "No additional human review items were identified.";
+    }
 
     return res.status(200).json({
       html_output,
@@ -197,4 +181,53 @@ if (!review_items) {
       details: error.message
     });
   }
+}
+
+function extractJsonObject(raw) {
+  if (!raw || typeof raw !== "string") {
+    throw new Error("Empty model response");
+  }
+
+  const trimmed = raw.trim();
+
+  try {
+    return JSON.parse(trimmed);
+  } catch (_) {
+    const firstBrace = trimmed.indexOf("{");
+    const lastBrace = trimmed.lastIndexOf("}");
+
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+      throw new Error("No JSON object found in model response");
+    }
+
+    const candidate = trimmed.substring(firstBrace, lastBrace + 1);
+    return JSON.parse(candidate);
+  }
+}
+
+function cleanHtml(html) {
+  let cleaned = (html || "").trim();
+
+  cleaned = cleaned.replace(/^```html/i, "").replace(/^```/, "").replace(/```$/, "").trim();
+  cleaned = cleaned.replace(/<!DOCTYPE html>/gi, "");
+  cleaned = cleaned.replace(/<\/?html[^>]*>/gi, "");
+  cleaned = cleaned.replace(/<\/?head[^>]*>/gi, "");
+  cleaned = cleaned.replace(/<\/?body[^>]*>/gi, "");
+  cleaned = cleaned.replace(/<\/?main[^>]*>/gi, "");
+  cleaned = cleaned.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "");
+
+  cleaned = cleaned.replace(/(>),(\s*)$/g, "$1");
+  cleaned = cleaned.replace(/(<\/[a-z0-9]+>),/gi, "$1");
+  cleaned = cleaned.replace(/,\s*$/g, "");
+
+  return cleaned.trim();
+}
+
+function toBullets(text) {
+  return String(text)
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => (line.startsWith("- ") ? line : `- ${line}`))
+    .join("\n");
 }
