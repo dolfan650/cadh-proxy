@@ -110,7 +110,6 @@ Return exactly this JSON shape:
             content: prompt
           }
         ],
-        temperature: 0.2
       })
     });
 
