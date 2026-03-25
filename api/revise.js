@@ -140,6 +140,11 @@ Output format:
 - "changes_made" must be an array of short strings describing what was changed.
 - "review_items" must be an array of short strings describing items that require human review. Return an empty array if there are none.
 
+Minimal intervention principle:
+- Make the smallest set of changes necessary to achieve compliance and clarity.
+- Do not rewrite content if it is already clear, accessible, and structurally sound.
+- Preserve instructor voice and tone unless clarity or accessibility requires change.
+
 Headings and structure:
 - Start headings at <h2>, not <h1>, for all Canvas content.
 - Maintain a logical heading hierarchy; do not skip heading levels.
@@ -152,6 +157,7 @@ Preservation rules:
 - Preserve iframe embeds unless clearly invalid or unsafe.
 - Preserve or apply full-width tables for readability unless there is a clear reason not to.
 - Preserve styling that supports readability and structure, such as table header shading, when it is accessibility-compliant.
+- Do not invent new instructional content, requirements, due dates, or policies that are not present in the original HTML.
 
 Tables (WCAG 1.3.1):
 - Ensure all data tables have a <caption> element.
@@ -199,6 +205,14 @@ Inline styles and font size:
 Grammar and mechanics:
 - Correct obvious grammar, punctuation, spelling, and mechanics issues only when meaning is clear and unambiguous.
 
+Before returning the final output, verify:
+- The HTML output is not empty.
+- All required WCAG fixes described in the rules have been applied.
+- No prohibited tags or full document wrappers are included.
+- The output reflects the selected Revision Mode constraints.
+
+If any of these checks fail, correct the output before returning JSON.
+
 Revision Mode: ${mode}
 Page Purpose: ${purpose}
 Content Type: ${type}
@@ -224,10 +238,10 @@ Return exactly this JSON shape:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        "Authorization": \`Bearer \${process.env.OPENAI_API_KEY}\`
       },
       body: JSON.stringify({
-        model: "gpt-5-mini",
+        model: "gpt-5",
         messages: [
           {
             role: "system",
@@ -238,7 +252,7 @@ Return exactly this JSON shape:
             role: "user",
             content: prompt
           }
-        ],
+        ]
       })
     });
 
@@ -343,20 +357,20 @@ function cleanHtml(html) {
   cleaned = cleaned.replace(/<\/?head[^>]*>/gi, "");
   cleaned = cleaned.replace(/<\/?body[^>]*>/gi, "");
   cleaned = cleaned.replace(/<\/?main[^>]*>/gi, "");
-  cleaned = cleaned.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "");
+  cleaned = cleaned.replace(/<title[^>]*>[\\s\\S]*?<\\/title>/gi, "");
 
-  cleaned = cleaned.replace(/(>),(\s*)$/g, "$1");
-  cleaned = cleaned.replace(/(<\/[a-z0-9]+>),/gi, "$1");
-  cleaned = cleaned.replace(/,\s*$/g, "");
+  cleaned = cleaned.replace(/(>),(\\s*)$/g, "$1");
+  cleaned = cleaned.replace(/(<\\/[a-z0-9]+>),/gi, "$1");
+  cleaned = cleaned.replace(/,\\s*$/g, "");
 
   return cleaned.trim();
 }
 
 function toBullets(text) {
   return String(text)
-    .split("\n")
+    .split("\\n")
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => (line.startsWith("- ") ? line : `- ${line}`))
-    .join("\n");
+    .map((line) => (line.startsWith("- ") ? line : \`- \${line}\`))
+    .join("\\n");
 }
