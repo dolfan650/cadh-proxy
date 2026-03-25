@@ -75,6 +75,8 @@ Rules:
 - Do not create a legend, key, or separate explanation of meaning (e.g., "status indicators"). Instead, apply the meaning directly to the relevant content using clear labels (e.g., "Urgent:", "On track:") within headings, lists, or inline text.
 - When replacing color-based meaning, integrate the meaning into the existing content rather than summarizing it separately.
 - Prefer transforming meaning into headings, lists, or labeled text rather than explanatory paragraphs.
+- Preserve or apply full-width tables (e.g., width: 100%) for readability unless there is a clear reason not to.
+- Preserve styling that supports readability and structure (e.g., table header shading) when it is accessibility-compliant.
 
 Revision Mode: ${mode}
 Page Purpose: ${purpose}
