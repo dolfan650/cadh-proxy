@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const mode =
       typeof revisionMode === "string" && revisionMode.trim()
         ? revisionMode.trim()
-        : "Accessibility Cleanup";
+        : "Fix Accessibility Issues";
 
     const purpose =
       typeof pagePurpose === "string" ? pagePurpose.trim() : "";
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     const type =
       typeof contentType === "string" && contentType.trim()
         ? contentType.trim()
-        : "Canvas page";
+        : "Canvas Page (General)";
 
     if (!inputHtml) {
       return res.status(400).json({
