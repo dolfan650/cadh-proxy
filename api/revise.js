@@ -57,7 +57,7 @@ Rules:
 - The "html_output" value must be an HTML fragment only, not a full HTML document.
 - Do not return <!DOCTYPE html>, <html>, <head>, <body>, <main>, or <title>.
 - Preserve valid existing HTML whenever possible.
-- Make the lightest effective revision.
+- Make the lightest effective revision, but do not preserve accessibility issues. Accessibility improvements take priority over preserving original styling.
 - For Canvas content, start headings at <h2>, not <h1>.
 - Convert fake lists into real semantic lists when needed.
 - Do not add unnecessary ARIA, wrappers, ids, sections, or landmarks.
@@ -69,6 +69,9 @@ Rules:
 - "changes_made" must be an array of short strings.
 - "review_items" must be an array of short strings.
 - If there are no review items, return an empty array.
+- Do not allow color alone to convey meaning. If color is used to indicate status, urgency, or importance, rewrite the content to include clear text-based meaning and remove or neutralize the color styling.
+- Remove inline styles that reduce readability, including very small font sizes (e.g., under 14px). Normalize text to standard readable size.
+- Remove or simplify non-essential inline styling (color, font-size, font-family) unless it is necessary and accessibility-compliant.
 
 Revision Mode: ${mode}
 Page Purpose: ${purpose}
