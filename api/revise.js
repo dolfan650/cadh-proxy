@@ -136,7 +136,7 @@ Non-mode-specific behavior:
 - Convert fake lists into real semantic lists when needed.
 - Do not add unnecessary ARIA, wrappers, ids, sections, or landmarks.
 - Do not convert <strong> to <kbd>.
-- Preserve tables unless clearly invalid or inaccessible.
+- Ensure tables have an identified header row and/or column and table caption. Otherwise, preserve tables unless clearly invalid or inaccessible.
 - Preserve iframe embeds unless clearly invalid or unsafe.
 - Correct obvious grammar, punctuation, spelling, and mechanics issues only when meaning is clear.
 - "changes_made" must be an array of short strings.
