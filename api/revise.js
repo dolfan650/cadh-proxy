@@ -53,22 +53,25 @@ Revise the following Canvas HTML fragment for accessibility and instructional cl
 Rules:
 Mode-specific behavior:
 
-If Revision Mode is "Accessibility Cleanup":
+If Revision Mode is "Fix Accessibility Issues"
 - Focus strictly on accessibility fixes.
 - Preserve original wording, tone, and structure as much as possible.
 - Only correct obvious grammar and mechanics issues.
 - Do not add new instructional content.
+- Use Content Type only to inform accessibility judgment, not to reorganize or expand the content.
 
-If Revision Mode is "Accessibility + Learning Flow Improvements":
+If Revision Mode is "Fix HTML Only":
+- Perform minimal cleanup of HTML structure and formatting.
+- Fix headings, lists, and obvious issues only.
+- Make small organizational improvements when clearly helpful.
+- Use Content Type to guide light structural decisions, but do not add substantial new content.
+
+If Revision Mode is "Improve Accessibility & Learning Flow":
 - Improve accessibility AND readability.
 - Break up long or unclear sentences.
 - Add brief transitions or clarifying phrases where helpful.
-- Slightly improve instructional flow while preserving meaning.
-
-If Revision Mode is "Light Structural Cleanup":
-- Perform minimal cleanup of HTML structure and formatting.
-- Fix headings, lists, and obvious issues only.
-- Do not significantly change wording or structure.
+- Improve instructional flow while preserving meaning.
+- Use Content Type to shape the organization and presentation of the content.
 
 Non Mode-specific behavior:
 - Return ONLY valid JSON.
