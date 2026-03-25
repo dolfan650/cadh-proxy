@@ -69,10 +69,11 @@ Rules:
 - "changes_made" must be an array of short strings.
 - "review_items" must be an array of short strings.
 - If there are no review items, return an empty array.
--Do not allow color alone to convey meaning. When color conveys meaning, convert that meaning into explicit text labels or structural cues so that the information remains clear without color.
+- Do not allow color alone to convey meaning. When color conveys meaning, convert that meaning into explicit text labels or structural cues so that the information remains clear without color.
 - Remove inline styles that reduce readability, including very small font sizes (e.g., under 14px). Normalize text to standard readable size.
 - Remove or simplify non-essential inline styling (color, font-size, font-family) unless it is necessary and accessibility-compliant.
-- When color is used to convey meaning (e.g., red = urgent, green = complete), do not simply describe the color. Replace the color-based meaning with clear, visible, text-based structure such as labels, headings, or list indicators (e.g., "Urgent:", "Completed:", "Action Required:").
+- Do not create a legend, key, or separate explanation of meaning (e.g., "status indicators"). Instead, apply the meaning directly to the relevant content using clear labels (e.g., "Urgent:", "On track:") within headings, lists, or inline text.
+- When replacing color-based meaning, integrate the meaning into the existing content rather than summarizing it separately.
 - Prefer transforming meaning into headings, lists, or labeled text rather than explanatory paragraphs.
 
 Revision Mode: ${mode}
