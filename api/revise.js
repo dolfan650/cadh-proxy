@@ -66,7 +66,7 @@ If Content Type is "Canvas Page (General)":
 If Content Type is "Module Overview":
 - Organize content into a clear flow: overview → objectives → tasks/materials → expectations.
 - Group related items (readings, activities, due dates) into clear sections.
-- Add a brief introductory sentence if missing in higher-touch modes.
+- Only add an introductory sentence if the page begins abruptly without context AND the Revision Mode is "Improve Accessibility & Learning Flow".
 - Improve scannability for weekly or unit-based navigation.
 
 If Content Type is "Assignment":
@@ -143,7 +143,7 @@ Output format:
 Minimal intervention principle:
 - Make the smallest set of changes necessary to achieve compliance and clarity.
 - Do not rewrite content if it is already clear, accessible, and structurally sound.
-- Preserve instructor voice and tone unless clarity or accessibility requires change.
+-  instructor voice and tone unless clarity or accessibility requires change.
 
 Headings and structure:
 - Start headings at <h2>, not <h1>, for all Canvas content.
@@ -158,6 +158,8 @@ Preservation rules:
 - Preserve or apply full-width tables for readability unless there is a clear reason not to.
 - Preserve styling that supports readability and structure, such as table header shading, when it is accessibility-compliant.
 - Do not invent new instructional content, requirements, due dates, or policies that are not present in the original HTML.
+- Do not introduce new section headings or reorganize content into new sections unless the original structure is unclear or inaccessible.
+- Do not rewrite full sentences or paragraphs unless they are unclear, ambiguous, or inaccessible. Prefer preserving original wording with minimal edits.
 
 Tables (WCAG 1.3.1):
 - Ensure all data tables have a <caption> element.
