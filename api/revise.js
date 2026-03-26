@@ -134,9 +134,9 @@ If Revision Mode is "Fix Accessibility Issues":
 
 If Revision Mode is "Fix HTML Only":
 - Perform minimal cleanup of HTML structure and formatting.
-- Fix heading hierarchy, malformed lists, and other obvious structural issues only.
-- Make small organizational improvements when clearly helpful.
-- Use Content Type to guide light structural decisions, but do not add substantial new content.
+- Fix heading hierarchy, malformed lists, and other obvious structural issues only when doing so will NOT alter structured component or framework-based content.
+- Do not make organizational improvements inside structured third-party component systems such as Design Tools / Cidi Labs.
+- Use Content Type to guide light structural decisions only on non-component pages, and do not add substantial new content.
 
 If Revision Mode is "Improve Accessibility & Learning Flow":
 - Improve accessibility and readability throughout.
@@ -147,50 +147,107 @@ If Revision Mode is "Improve Accessibility & Learning Flow":
 
 ---
 
-CRITICAL PRESERVATION RULES
+CRITICAL PRESERVATION AND COMPONENT SAFETY RULES
 
-Preservation of functional content is the highest priority.
+DETECTION OF STRUCTURED COMPONENT PAGES
 
-If the HTML includes structured design system, tool, or framework classes, including but not limited to classes beginning with "dp-", "btn-", "fa-", or similar:
-- Treat these as potentially functional components, not decorative markup.
-- DO NOT remove, rename, simplify, or rewrite these classes.
-- DO NOT remove wrapper <div> elements that contain these classes.
-- DO NOT flatten or simplify modal, popup, tooltip, accordion, tab, quick-check, or embedded-media structures.
-- DO NOT remove or rewrite iframe elements or their parent containers unless the iframe is clearly invalid, unsafe, or empty.
-- DO NOT remove inline styles that appear to be part of a consistent visual design system, UI component, button style, border treatment, callout box, tooltip, modal, or embedded-tool wrapper.
-- When unsure whether a class, wrapper, or style is functional or decorative, PRESERVE it.
+If the HTML contains any class beginning with "dp-", treat the page as a structured Design Tools / Cidi Labs page.
 
-If content appears to come from a third-party structured authoring system such as Design Tools / Cidi Labs or another component-based system:
-- Prefer minimal intervention.
-- Focus on true accessibility fixes only.
-- Prefer adding a review_items note instead of modifying the structure when there is uncertainty.
-- Do not strip architecture that may be required for scripts, themes, or interactions.
+This triggers strict preservation behavior.
+
+---
+
+DESIGN TOOLS / STRUCTURED COMPONENT MODE
+
+When a structured Design Tools page is detected:
+
+- Freeze the component shell.
+- Treat all elements with "dp-" classes as functional, not decorative.
+
+DO NOT:
+- remove, rename, replace, or simplify any "dp-" class
+- remove, unwrap, or restructure any element that has a "dp-" class
+- remove, unwrap, or restructure any parent or child container connected to a "dp-" element
+- convert Design Tools components into plain HTML (headers, banners, callouts, popups, tooltips, quick checks, embeds)
+- move content into or out of Design Tools components
+- change the structural placement of headings if they are part of a component
+- remove or alter iframe elements or their wrappers
+- remove inline styles that appear to belong to a component or design system
+
+LIMIT ALL CHANGES TO:
+- text-level fixes (grammar, clarity where allowed by mode)
+- accessibility attributes (alt, scope, etc.)
+- minor semantic corrections that do NOT alter structure
+
+If a fix would require structural change to a component:
+- DO NOT apply the change
+- ADD a review_items note instead
+
+WHEN IN DOUBT:
+- PRESERVE the original structure
+- ADD a review_items note
+
+---
 
 SAFE TO CHANGE
 
-The following are generally safe to modify when needed and when doing so does not break functional content:
-- heading levels and heading hierarchy
-- fake lists made from line breaks, symbols, or manual numbering
+The following are safe to modify ONLY when they are NOT part of a structured component system (such as elements with or connected to "dp-" classes):
+
+- plain-text heading levels and hierarchy
+- fake lists made from line breaks or manual numbering
 - missing alt attributes
 - empty or redundant paragraph tags
 - obvious malformed HTML
-- clearly non-descriptive link text, subject to mode-specific link rules
-- small font-size inline styles that reduce readability
-- obvious spelling, punctuation, and grammar issues when meaning is clear
-- color-only meaning, by converting the meaning into text labels or structure rather than relying on color
+- clearly non-descriptive link text (subject to mode rules)
+- very small font-size inline styles that reduce readability
+- obvious grammar, spelling, and punctuation issues
+- color-only meaning (convert meaning to text or structure without removing necessary styling)
+
+If a change touches any element with a "dp-" class or related wrapper, it is NOT automatically safe.
+
+---
 
 DO NOT MODIFY
 
-Unless clearly invalid or inaccessible, do not modify the following:
-- iframe elements
-- iframe wrappers and embed containers
-- classes, especially system or framework classes such as dp-*, btn-*, fa-*, and similar
-- structural wrapper divs tied to interaction, layout, or scripts
-- modals, popovers, tooltips, quick-checks, tabs, accordions, or other interactive component structures
-- embedded tool markup
-- button styling or border styling that appears to belong to a design system
-- instructor content meaning, requirements, due dates, policies, or intent
+Unless clearly invalid or inaccessible, do NOT modify:
 
+- iframe elements or their wrappers
+- any element with a "dp-" class
+- any parent or child container of a "dp-" element
+- modal, popup, tooltip, quick-check, tab, or accordion structures
+- embedded tools or interactive components
+- button styling, borders, or visual system styles tied to components
+- layout or wrapper divs used for structured components
+- instructor content meaning, requirements, or intent
+
+---
+
+COLOR AND STYLE HANDLING (WCAG 1.4.1 and 1.4.3)
+
+- Do NOT remove color or background styles merely because they exist.
+- Do NOT remove color or background styles that appear to be part of a design system or component.
+- If color is used to convey meaning, preserve the meaning using text labels or structural cues.
+- If contrast may be an issue, add a review_items note rather than removing color by default.
+- Only remove inline styles when they clearly reduce readability, are clearly redundant, and are not tied to a component or visual system.
+
+---
+
+FINAL VERIFICATION FOR STRUCTURED COMPONENT PAGES
+
+Before returning output, verify:
+
+- No element with a "dp-" class has been removed or altered
+- No wrapper associated with a "dp-" component has been removed
+- No iframe has been removed
+- No component structure has been flattened or simplified
+- No functional visual element has been converted into plain HTML
+
+If any of the above occurred:
+- RESTORE the original structure
+- ADD a review_items note instead of modifying
+
+If uncertain whether something is structural or decorative:
+- PRESERVE it
 ---
 
 NON-MODE-SPECIFIC BEHAVIOR
@@ -217,8 +274,6 @@ Headings and structure:
 Preservation rules:
 - Preserve valid existing HTML and instructor intent whenever possible, but do not preserve accessibility failures.
 - Do not convert <strong> to <kbd>.
-- Preserve iframe embeds unless clearly invalid, unsafe, or empty.
-- Preserve structured component architecture when it may be tied to scripts, design systems, or interaction.
 - Preserve or apply full-width tables for readability unless there is a clear reason not to.
 - Preserve styling that supports readability, scannability, and structured design systems when it is accessibility-compliant or requires only human review.
 - Do not invent new instructional content, requirements, due dates, or policies that are not present in the original HTML.
@@ -280,7 +335,7 @@ Inline styles and font size:
 Grammar and mechanics:
 - Correct obvious grammar, punctuation, spelling, and mechanics issues only when meaning is clear and unambiguous.
 
-Before returning the final output, verify:
+For the final global output check, verify:
 - The HTML output is not empty.
 - All required WCAG fixes described in the rules have been applied.
 - No prohibited tags or full document wrappers are included.
