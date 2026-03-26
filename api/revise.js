@@ -58,6 +58,16 @@ Revise the following Canvas HTML fragment for accessibility and instructional cl
 
 Governing standard: All revisions must target WCAG 2.1 Level AA compliance. Apply specific WCAG 2.1 AA success criteria as the basis for all accessibility decisions.
 
+RULE PRIORITY ORDER (highest to lowest):
+
+1. Preservation of functional content and interactive components
+2. WCAG 2.1 AA accessibility compliance
+3. Structural clarity and semantic HTML
+4. Instructional clarity and learning flow improvements
+5. Visual/style cleanup
+
+If any rules conflict, ALWAYS follow the higher priority rule.
+
 ---
 
 CONTENT-TYPE-SPECIFIC BEHAVIOR
@@ -71,7 +81,7 @@ If Content Type is "Canvas Page (General)":
 
 If Content Type is "Module Overview":
 - Organize content into a clear flow: overview → objectives → tasks/materials → expectations.
-- Group related items (readings, activities, due dates) into clear sections.
+- Group related items such as readings, activities, and due dates into clear sections.
 - Only add an introductory sentence if the page begins abruptly without context AND the Revision Mode is "Improve Accessibility & Learning Flow".
 - Improve scannability for weekly or unit-based navigation.
 
@@ -137,6 +147,52 @@ If Revision Mode is "Improve Accessibility & Learning Flow":
 
 ---
 
+CRITICAL PRESERVATION RULES
+
+Preservation of functional content is the highest priority.
+
+If the HTML includes structured design system, tool, or framework classes, including but not limited to classes beginning with "dp-", "btn-", "fa-", or similar:
+- Treat these as potentially functional components, not decorative markup.
+- DO NOT remove, rename, simplify, or rewrite these classes.
+- DO NOT remove wrapper <div> elements that contain these classes.
+- DO NOT flatten or simplify modal, popup, tooltip, accordion, tab, quick-check, or embedded-media structures.
+- DO NOT remove or rewrite iframe elements or their parent containers unless the iframe is clearly invalid, unsafe, or empty.
+- DO NOT remove inline styles that appear to be part of a consistent visual design system, UI component, button style, border treatment, callout box, tooltip, modal, or embedded-tool wrapper.
+- When unsure whether a class, wrapper, or style is functional or decorative, PRESERVE it.
+
+If content appears to come from a third-party structured authoring system such as Design Tools / Cidi Labs or another component-based system:
+- Prefer minimal intervention.
+- Focus on true accessibility fixes only.
+- Prefer adding a review_items note instead of modifying the structure when there is uncertainty.
+- Do not strip architecture that may be required for scripts, themes, or interactions.
+
+SAFE TO CHANGE
+
+The following are generally safe to modify when needed and when doing so does not break functional content:
+- heading levels and heading hierarchy
+- fake lists made from line breaks, symbols, or manual numbering
+- missing alt attributes
+- empty or redundant paragraph tags
+- obvious malformed HTML
+- clearly non-descriptive link text, subject to mode-specific link rules
+- small font-size inline styles that reduce readability
+- obvious spelling, punctuation, and grammar issues when meaning is clear
+- color-only meaning, by converting the meaning into text labels or structure rather than relying on color
+
+DO NOT MODIFY
+
+Unless clearly invalid or inaccessible, do not modify the following:
+- iframe elements
+- iframe wrappers and embed containers
+- classes, especially system or framework classes such as dp-*, btn-*, fa-*, and similar
+- structural wrapper divs tied to interaction, layout, or scripts
+- modals, popovers, tooltips, quick-checks, tabs, accordions, or other interactive component structures
+- embedded tool markup
+- button styling or border styling that appears to belong to a design system
+- instructor content meaning, requirements, due dates, policies, or intent
+
+---
+
 NON-MODE-SPECIFIC BEHAVIOR
 
 Output format:
@@ -150,26 +206,28 @@ Minimal intervention principle:
 - Make the smallest set of changes necessary to achieve compliance and clarity.
 - Do not rewrite content if it is already clear, accessible, and structurally sound.
 - Preserve instructor voice and tone unless clarity or accessibility requires change.
+- When a change could risk breaking structure, interaction, styling systems, or embedded tools, prefer preserving the content and adding a review_items note.
 
 Headings and structure:
 - Start headings at <h2>, not <h1>, for all Canvas content.
 - Maintain a logical heading hierarchy; do not skip heading levels.
-- Convert fake lists (line breaks, dashes, or symbols used as bullets) into real semantic <ul> or <ol> lists.
+- Convert fake lists into real semantic <ul> or <ol> lists.
 - Do not add unnecessary ARIA attributes, wrapper elements, ids, sections, or landmark roles.
 
 Preservation rules:
 - Preserve valid existing HTML and instructor intent whenever possible, but do not preserve accessibility failures.
 - Do not convert <strong> to <kbd>.
-- Preserve iframe embeds unless clearly invalid or unsafe.
+- Preserve iframe embeds unless clearly invalid, unsafe, or empty.
+- Preserve structured component architecture when it may be tied to scripts, design systems, or interaction.
 - Preserve or apply full-width tables for readability unless there is a clear reason not to.
-- Preserve styling that supports readability and structure, such as table header shading, when it is accessibility-compliant.
+- Preserve styling that supports readability, scannability, and structured design systems when it is accessibility-compliant or requires only human review.
 - Do not invent new instructional content, requirements, due dates, or policies that are not present in the original HTML.
-- Do not introduce new section headings or reorganize content into new sections unless the original structure is unclear or inaccessible.
-- Do not rewrite full sentences or paragraphs unless they are unclear, ambiguous, or inaccessible. Prefer preserving original wording with minimal edits.
+- Do not introduce new section headings or reorganize content into new sections unless the original structure is unclear or inaccessible and the selected mode permits such changes.
+- Do not rewrite full sentences or paragraphs unless they are unclear, ambiguous, inaccessible, or the selected mode explicitly supports learning-flow improvements.
 
 Tables (WCAG 1.3.1):
 - Ensure all data tables have a <caption> element.
-- Ensure header cells use <th> with appropriate scope attributes (scope="col" or scope="row").
+- Ensure header cells use <th> with appropriate scope attributes such as scope="col" or scope="row".
 - Do not use tables for layout purposes.
 - Otherwise, preserve tables unless they are clearly invalid or inaccessible.
 
@@ -177,25 +235,29 @@ Links (WCAG 2.4.4):
 - Ensure all link text is descriptive and meaningful out of context.
 - Replace or flag non-descriptive link text such as "click here," "here," "read more," or bare URLs.
 - In "Fix Accessibility Issues" and "Fix HTML Only" modes, flag non-descriptive links in review_items only. Do not rewrite link text unless the correct label is explicitly present as the immediate surrounding text of the link with no interpretation required.
-- In "Improve Accessibility & Learning Flow" mode, rewrite non-descriptive link text when the correct label is clear from surrounding content.
+- In "Improve Accessibility & Learning Flow" mode, rewrite non-descriptive link text only when the correct label is clear from surrounding content.
+- Do not move tooltip, popover, or modal content outside its component structure merely to change link wording.
 
 Images (WCAG 1.1.1):
-- When an <img> element has no alt attribute, always add alt="" to the output HTML in all modes. Always add a corresponding review_items entry instructing the instructor to provide descriptive alt text if the image is meaningful, or to confirm alt="" if it is decorative. Do not leave the alt attribute absent under any circumstances.
+- When an <img> element has no alt attribute, always add alt="" to the output HTML in all modes.
+- Always add a corresponding review_items entry instructing the instructor to provide descriptive alt text if the image is meaningful, or to confirm alt="" if it is decorative.
+- Do not leave the alt attribute absent under any circumstances.
 - If an <img> has alt="" and appears to be decorative, preserve it.
 - If an <img> has alt="" but appears to be meaningful, flag it in review_items.
 - Do not generate alt text automatically.
-- Do not use images of text when live text can be used instead (WCAG 1.4.5). Flag images that appear to contain text in review_items.
+- Do not use images of text when live text can be used instead. Flag images that appear to contain text in review_items.
 
 Color and meaning (WCAG 1.4.1):
 - The color-meaning rules apply in all three modes without exception.
 - Do not allow color alone to convey meaning.
-- Removing color without preserving the meaning it conveyed is never a valid fix. If color conveyed a distinction that cannot be resolved structurally in the current mode, flag it in review_items.
+- Removing color without preserving the meaning it conveyed is never a valid fix.
+- If color conveyed a distinction that cannot be resolved safely in the current mode, preserve the styling and flag it in review_items.
 - When color conveys meaning, convert that meaning into explicit text labels or structural cues so the information remains clear without color.
-- When color distinguishes categories, reorganize the content into meaningfully labeled groups rather than describing the former color coding.
+- When color distinguishes categories, reorganize the content into meaningfully labeled groups only if the selected mode allows structural improvement and the change does not risk breaking functional content.
 - Do not create a legend, key, or separate explanation of color meaning. Apply the meaning directly to the relevant content using labels, headings, lists, or inline text.
 - Integrate color-based meaning into the existing content structure rather than summarizing it separately.
 - Prefer transforming meaning into headings, grouped sections, lists, or labeled text rather than explanatory paragraphs.
-- When integrating text labels to replace color-only meaning causes obvious redundancy in the surrounding sentence, the tool may minimally simplify that sentence even in "Fix Accessibility Issues" mode, provided no meaning is changed or lost.
+- When integrating text labels to replace color-only meaning causes obvious redundancy in the surrounding sentence, the tool may minimally simplify that sentence provided no meaning is changed or lost.
 
 Color-styled headings (WCAG 1.3.1, 1.4.1):
 - When color-styled text functions as a titled subsection heading and is followed by related content, convert it to the appropriate heading level in all modes.
@@ -204,11 +266,16 @@ Color-styled headings (WCAG 1.3.1, 1.4.1):
 
 Color contrast (WCAG 1.4.3):
 - Do not attempt to evaluate or fix color contrast ratios automatically.
-- Flag any inline color styles applied to text in review_items so the instructor can verify that contrast ratios meet the 4.5:1 minimum for normal text and 3:1 for large text.
+- Do not remove inline color or background styles merely because they exist.
+- Do not remove inline color or background styles that appear to be part of a consistent design system or UI component.
+- Only remove inline styles when they clearly reduce readability, are clearly redundant, or are not tied to functional or structured design.
+- If text color or background color is present, add a review_items note instructing the instructor to verify that contrast meets WCAG 2.1 AA requirements.
+- Preserve styling and flag contrast for human review rather than stripping color by default.
 
 Inline styles and font size:
-- Remove inline styles that reduce readability, including font sizes under 14px.
-- Remove or simplify non-essential inline styling unless it is necessary and accessibility-compliant.
+- Remove inline styles that clearly reduce readability, including font sizes under 14px.
+- Preserve non-essential inline styling if removing it could affect a structured design system, component behavior, or visual hierarchy tied to instruction.
+- Simplify non-essential inline styling only when it is clearly safe to do so.
 
 Grammar and mechanics:
 - Correct obvious grammar, punctuation, spelling, and mechanics issues only when meaning is clear and unambiguous.
@@ -217,7 +284,9 @@ Before returning the final output, verify:
 - The HTML output is not empty.
 - All required WCAG fixes described in the rules have been applied.
 - No prohibited tags or full document wrappers are included.
+- No functional components, embeds, classes, or structured tool architecture were broken or removed.
 - The output reflects the selected Revision Mode constraints.
+- If uncertain whether a change could break a component or design system, preserve the original structure and add a review_items note instead.
 
 If any of these checks fail, correct the output before returning JSON.
 
