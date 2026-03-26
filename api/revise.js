@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -21,7 +21,13 @@ export default async function handler(req, res) {
     let inputHtml = "";
 
     if (typeof html_b64 === "string" && html_b64.trim()) {
-      inputHtml = Buffer.from(html_b64, "base64").toString("utf-8").trim();
+      try {
+        inputHtml = Buffer.from(html_b64, "base64").toString("utf-8").trim();
+      } catch (e) {
+        return res.status(400).json({
+          error: "Invalid html_b64 payload"
+        });
+      }
     } else if (typeof html === "string") {
       inputHtml = html.trim();
     }
@@ -143,7 +149,7 @@ Output format:
 Minimal intervention principle:
 - Make the smallest set of changes necessary to achieve compliance and clarity.
 - Do not rewrite content if it is already clear, accessible, and structurally sound.
--  instructor voice and tone unless clarity or accessibility requires change.
+- Preserve instructor voice and tone unless clarity or accessibility requires change.
 
 Headings and structure:
 - Start headings at <h2>, not <h1>, for all Canvas content.
@@ -240,10 +246,12 @@ Return exactly this JSON shape:
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": \`Bearer \${process.env.OPENAI_API_KEY}\`
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-5",
+        model: "gpt-4.1",
+        temperature: 0.2,
+        response_format: { type: "json_object" },
         messages: [
           {
             role: "system",
@@ -264,7 +272,7 @@ Return exactly this JSON shape:
       console.error("OpenAI API error:", data);
       return res.status(500).json({
         error: "OpenAI request failed",
-        details: data
+        details: data?.error || data
       });
     }
 
@@ -285,18 +293,12 @@ Return exactly this JSON shape:
       typeof parsed.html_output === "string" ? parsed.html_output.trim() : "";
 
     let changes_made = Array.isArray(parsed.changes_made)
-      ? parsed.changes_made
-          .map((item) => String(item).trim())
-          .filter(Boolean)
-          .join("\n")
-      : "";
+      ? parsed.changes_made.map((item) => String(item).trim()).filter(Boolean)
+      : [];
 
     let review_items = Array.isArray(parsed.review_items)
-      ? parsed.review_items
-          .map((item) => String(item).trim())
-          .filter(Boolean)
-          .join("\n")
-      : "";
+      ? parsed.review_items.map((item) => String(item).trim()).filter(Boolean)
+      : [];
 
     html_output = cleanHtml(html_output);
 
@@ -304,13 +306,10 @@ Return exactly this JSON shape:
       html_output = inputHtml;
     }
 
-    if (!changes_made) {
-      changes_made =
-        "Reviewed the HTML and preserved the original structure where possible.";
-    }
-
-    if (!review_items) {
-      review_items = "No additional human review items were identified.";
+    if (changes_made.length === 0) {
+      changes_made = [
+        "Reviewed the HTML and preserved the original structure where possible."
+      ];
     }
 
     return res.status(200).json({
@@ -326,7 +325,7 @@ Return exactly this JSON shape:
       details: error.message
     });
   }
-}
+};
 
 function extractJsonObject(raw) {
   if (!raw || typeof raw !== "string") {
@@ -353,26 +352,34 @@ function extractJsonObject(raw) {
 function cleanHtml(html) {
   let cleaned = (html || "").trim();
 
-  cleaned = cleaned.replace(/^```html/i, "").replace(/^```/, "").replace(/```$/, "").trim();
+  cleaned = cleaned
+    .replace(/^```html/i, "")
+    .replace(/^```/, "")
+    .replace(/```$/, "")
+    .trim();
+
   cleaned = cleaned.replace(/<!DOCTYPE html>/gi, "");
   cleaned = cleaned.replace(/<\/?html[^>]*>/gi, "");
   cleaned = cleaned.replace(/<\/?head[^>]*>/gi, "");
   cleaned = cleaned.replace(/<\/?body[^>]*>/gi, "");
   cleaned = cleaned.replace(/<\/?main[^>]*>/gi, "");
-  cleaned = cleaned.replace(/<title[^>]*>[\\s\\S]*?<\\/title>/gi, "");
+  cleaned = cleaned.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "");
 
-  cleaned = cleaned.replace(/(>),(\\s*)$/g, "$1");
-  cleaned = cleaned.replace(/(<\\/[a-z0-9]+>),/gi, "$1");
-  cleaned = cleaned.replace(/,\\s*$/g, "");
+  cleaned = cleaned.replace(/(>),(\s*)$/g, "$1");
+  cleaned = cleaned.replace(/(<\/[a-z0-9]+>),/gi, "$1");
+  cleaned = cleaned.replace(/,\s*$/g, "");
 
   return cleaned.trim();
 }
 
-function toBullets(text) {
-  return String(text)
-    .split("\\n")
-    .map((line) => line.trim())
+function toBullets(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return "";
+  }
+
+  return items
+    .map((line) => String(line).trim())
     .filter(Boolean)
-    .map((line) => (line.startsWith("- ") ? line : \`- \${line}\`))
-    .join("\\n");
+    .map((line) => (line.startsWith("- ") ? line : `- ${line}`))
+    .join("\n");
 }
