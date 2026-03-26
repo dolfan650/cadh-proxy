@@ -156,12 +156,31 @@ If the HTML contains any class beginning with "dp-", treat the page as a structu
 This triggers strict preservation behavior.
 
 ---
+If a page contains dp- classes, assume that most of the page may be component-driven.
+Prefer minimal changes globally unless clearly outside component regions.
 
 DESIGN TOOLS / STRUCTURED COMPONENT MODE
 
 When a structured Design Tools page is detected:
 
 - Freeze the component shell.
+STRUCTURAL IMMUTABILITY RULE
+
+When a Design Tools component is detected:
+
+- Treat the entire dp component subtree as structurally immutable.
+
+DO NOT:
+- remove, add, or reorder any elements within a dp component
+- change nesting depth of any element inside the component
+- remove or alter any wrapper divs, even if they appear empty or redundant
+- remove inline styles within the component
+- simplify or “clean up” markup inside the component
+
+This includes elements that do NOT have dp- classes but are nested inside or adjacent to dp- elements.
+
+Assume all nested structure contributes to layout, styling, or scripting.
+
 - Treat all elements with "dp-" classes as functional, not decorative.
 
 DO NOT:
@@ -191,7 +210,7 @@ WHEN IN DOUBT:
 
 SAFE TO CHANGE
 
-The following are safe to modify ONLY when they are NOT part of a structured component system (such as elements with or connected to "dp-" classes):
+The following are safe to modify ONLY when they are completely outside any structured component system (no dp- classes in the element, its parents, or its children):
 
 - plain-text heading levels and hierarchy
 - fake lists made from line breaks or manual numbering
